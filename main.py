@@ -83,7 +83,8 @@ if __name__ == '__main__':
             pin_memory=True)
         train_logger = Logger(
             os.path.join(opt.result_path, 'train.log'),
-            ['epoch', 'loss', 'acc', 'lr'])
+            ['epoch', 'loss', 'acc', 'lr'], 
+            tensorboard_path=os.path.join(opt.result_path, 'tensorboard'))
         train_batch_logger = Logger(
             os.path.join(opt.result_path, 'train_batch.log'),
             ['epoch', 'batch', 'iter', 'loss', 'acc', 'lr'])
