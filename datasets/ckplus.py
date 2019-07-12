@@ -37,10 +37,13 @@ def get_default_image_loader():
 def video_loader(video_dir_path, frame_indices, image_loader):
     video = []
     for i in frame_indices:
-        image_path = os.path.join(video_dir_path, 'image_{:05d}.jpg'.format(i))
+        subject = video_dir_path.split('/')[-2]
+        session = video_dir_path.split('/')[-1]
+        image_path = os.path.join(video_dir_path, '{}_{}_{:08d}.png'.format(subject, session, i))
         if os.path.exists(image_path):
             video.append(image_loader(image_path))
         else:
+            print("frame {} not found.".format(image_path))
             return video
 
     return video
@@ -71,9 +74,9 @@ def get_video_names_and_annotations(data, subset):
 
     for key, value in data['database'].items():
         this_subset = value['subset']
-        if this_subset == subset:
+        if this_subset == subset and 'label' in value['annotations']:
             label = value['annotations']['label']
-            video_names.append('{}/{}'.format(label, key))
+            video_names.append(key)
             annotations.append(value['annotations'])
 
     return video_names, annotations
@@ -96,7 +99,7 @@ def make_dataset(root_path, annotation_path, subset, n_samples_for_each_video,
         video_path = os.path.join(root_path, video_names[i])
         if not os.path.exists(video_path):
             continue
-
+        
         n_frames_file_path = os.path.join(video_path, 'n_frames')
         n_frames = int(load_value_file(n_frames_file_path))
         if n_frames <= 0:
@@ -108,7 +111,7 @@ def make_dataset(root_path, annotation_path, subset, n_samples_for_each_video,
             'video': video_path,
             'segment': [begin_t, end_t],
             'n_frames': n_frames,
-            'video_id': video_names[i].split('/')[1]
+            'video_id': video_names[i]
         }
         if len(annotations) != 0:
             sample['label'] = class_to_idx[annotations[i]['label']]
@@ -134,7 +137,7 @@ def make_dataset(root_path, annotation_path, subset, n_samples_for_each_video,
     return dataset, idx_to_class
 
 
-class UCF101(data.Dataset):
+class CKPLUS(data.Dataset):
     """
     Args:
         root (string): Root directory path.
@@ -178,7 +181,7 @@ class UCF101(data.Dataset):
             tuple: (image, target) where target is class_index of the target class.
         """
         path = self.data[index]['video']
-
+        
         frame_indices = self.data[index]['frame_indices']
         if self.temporal_transform is not None:
             frame_indices = self.temporal_transform(frame_indices)

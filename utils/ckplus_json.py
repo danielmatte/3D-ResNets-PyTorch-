@@ -18,8 +18,10 @@ def getEmotionFromFile(dataset_path, filename):
 def getVideoPath(dataset_path, filename):
     subject = filename.split('/')[-3]
     session = filename.split('/')[-2]
-    video_path = "cohn-kanade-images/{}/{}".format(subject, session)
-    if (os.path.isdir(dataset_path+video_path)):
+    images_path = "cohn-kanade-images/"
+    video_path = os.path.join(subject, session)
+    
+    if (os.path.isdir(os.path.join(dataset_path,images_path,video_path))):
       return video_path
     else:
       return None
